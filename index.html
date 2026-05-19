@@ -318,6 +318,7 @@
   .ing-int-label { font-size: 10px; color: #b45309; margin-top: 2px; }
 
   .ing-editar-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .ing-editar-wrap > .ing-field:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .ing-field { display: flex; flex-direction: column; gap: 4px; }
   .ing-field label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gris-texto); font-weight: 600; }
   .ing-field input {
@@ -1213,6 +1214,8 @@ async function enviarRegistro(tipo, cat, importe, desc) {
   d.saldoNomina  = Math.max(0, parseFloat(sN.toFixed(2)));
   d.saldoNaranja = Math.max(0, parseFloat(sO.toFixed(2)));
   d.efectivo     = Math.max(0, parseFloat(sE.toFixed(2)));
+  // Preservar tin y otros campos que no cambian con movimientos
+  if (!d.tin) d.tin = ingData.tin ?? 0.99;
   localStorage.setItem("ing_data", JSON.stringify(d));
   ingData = d;
   // Si la pantalla ING está visible, refrescarla
@@ -1226,7 +1229,7 @@ async function enviarRegistro(tipo, cat, importe, desc) {
 
   if (scriptURL) {
     try {
-      const registroSheet = { ...registro, importe: registro.importe.replace(".", ","), accion: "escribir" };
+      const registroSheet = { ...registro, importe: registro.importe.replace(".", ","), accion: "escribir", hoja: "Hoja 1" };
       await fetch(scriptURL + "?" + new URLSearchParams(registroSheet).toString(), { method:"GET", mode:"no-cors" });
     } catch(e) {}
   }
@@ -1397,11 +1400,15 @@ function initING() {
 }
 
 function actualizarING() {
-  const saldoNomina  = parseFloat(document.getElementById("inputSaldoNomina").value)  || ingData.saldoNomina;
-  const saldoNaranja = parseFloat(document.getElementById("inputSaldoNaranja").value) || ingData.saldoNaranja;
-  const efectivo     = parseFloat(document.getElementById("inputEfectivo").value)     || 0;
-  const tin          = parseFloat(document.getElementById("inputTIN").value)          || ingData.tin;
-  const dias         = parseInt(document.getElementById("inputDias").value)            || 30;
+  const inputN = document.getElementById("inputSaldoNomina").value;
+  const inputO = document.getElementById("inputSaldoNaranja").value;
+  const inputE = document.getElementById("inputEfectivo").value;
+  const inputT = document.getElementById("inputTIN").value;
+  const saldoNomina  = inputN !== "" ? parseFloat(inputN)  : (ingData.saldoNomina  ?? 114.60);
+  const saldoNaranja = inputO !== "" ? parseFloat(inputO)  : (ingData.saldoNaranja ?? 6199.12);
+  const efectivo     = inputE !== "" ? parseFloat(inputE)  : (ingData.efectivo     ?? 0);
+  const tin          = inputT !== "" ? parseFloat(inputT)  : (ingData.tin          ?? 0.99);
+  const dias         = parseInt(document.getElementById("inputDias").value) || 30;
   const total        = saldoNomina + saldoNaranja + efectivo;
 
   // Guardar
