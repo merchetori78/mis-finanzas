@@ -845,7 +845,10 @@
 
     async function sendToSheets(movement) {
       const scriptUrl = localStorage.getItem(STORAGE_KEYS.scriptUrl);
-      if (!scriptUrl) return false;
+      if (!scriptUrl) {
+        showToast("Movimiento guardado solo en la app: falta la URL del Apps Script.");
+        return false;
+      }
 
       const params = new URLSearchParams({
         fecha: movement.fecha,
@@ -854,16 +857,34 @@
         categoria: movement.categoria,
         importe: movement.importe,
         descripcion: movement.descripcion,
-        cuenta: movement.cuenta
+        cuenta: movement.cuenta,
+        cache: Date.now()
       });
 
+      const url = `${scriptUrl}?${params.toString()}`;
+
       try {
-        await fetch(`${scriptUrl}?${params.toString()}`, { method: "GET", mode: "no-cors" });
+        await fetch(url, { method: "GET", mode: "no-cors" });
         return true;
       } catch (error) {
-        showToast("No se pudo enviar a Google Sheets. Revisa la URL del Apps Script.");
-        return false;
+        try {
+          await sendWithBeaconImage(url);
+          return true;
+        } catch (secondError) {
+          showToast("No se pudo enviar a Google Sheets. Revisa permisos y despliegue del Apps Script.");
+          return false;
+        }
       }
+    }
+
+    function sendWithBeaconImage(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = resolve;
+        img.onerror = resolve;
+        img.src = url;
+        setTimeout(resolve, 1800);
+      });
     }
 
     function saveGoal(event) {
