@@ -1015,7 +1015,7 @@
 <div class="toast" id="toast"></div>
 
 <!-- Overlay config -->
-<div class="overlay" id="overlayConfig">
+<div class="overlay oculto" id="overlayConfig">
   <div class="overlay-icon">🔗</div>
   <div class="overlay-titulo">Conectar Google Sheets</div>
   <div class="overlay-sub">Pega la URL de tu Google Apps Script para guardar los movimientos automáticamente.</div>
@@ -1054,7 +1054,10 @@ let catActual = "nomina";
 let modoBloque = false;
 let bloqueItems = [];
 let historial = JSON.parse(localStorage.getItem("finanzas_historial") || "[]");
-let scriptURL = localStorage.getItem("finanzas_url") || "https://script.google.com/macros/s/AKfycbzmsgH67juwcQDFl0uYHbc8axs8WOkVk5Ws21ybsGJAous5-heND8ts8ptnDMBYmhVHPQ/exec";
+const SCRIPT_URL_DEFAULT = "https://script.google.com/macros/s/AKfycbzmsgH67juwcQDFl0uYHbc8axs8WOkVk5Ws21ybsGJAous5-heND8ts8ptnDMBYmhVHPQ/exec";
+let scriptURL = localStorage.getItem("finanzas_url") || SCRIPT_URL_DEFAULT;
+// Guardar en localStorage si no estaba para que persista
+if (!localStorage.getItem("finanzas_url")) localStorage.setItem("finanzas_url", SCRIPT_URL_DEFAULT);
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 function init() {
@@ -1062,8 +1065,8 @@ function init() {
   document.getElementById("headerMes").textContent = MESES[ahora.getMonth()] + " " + ahora.getFullYear();
   renderCategorias();
   actualizarResumen();
-  if (!scriptURL) setTimeout(() => document.getElementById("overlayConfig").classList.remove("oculto"), 500);
-  else document.getElementById("overlayConfig").classList.add("oculto");
+  // Ocultar siempre el overlay si hay URL configurada
+  document.getElementById("overlayConfig").classList.add("oculto");
 }
 
 // ── TIPO ──────────────────────────────────────────────────────────────────────
