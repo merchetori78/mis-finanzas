@@ -702,6 +702,11 @@
     <div class="ajuste-valor" id="textoURL">No configurado</div>
     <button class="ajuste-btn" onclick="abrirConfig()">Cambiar URL</button>
   </div>
+  <div class="ajuste-card">
+    <div class="ajuste-label">💵 Resetear efectivo</div>
+    <div style="font-size:12px;color:var(--gris-texto);margin-bottom:10px;">Pone el efectivo a 0,00 € sin borrar el historial ni los saldos bancarios.</div>
+    <button class="ajuste-btn" onclick="resetearEfectivo()">Poner efectivo a 0 €</button>
+  </div>
   <div class="instrucciones">
     <h3>📋 Cómo conectar con Google Sheets</h3>
     <ol>
@@ -743,14 +748,19 @@
         <div class="ing-cuenta-nombre">💵 Efectivo</div>
         <div class="ing-cuenta-saldo" id="saldoEfectivo" style="color:var(--dorado);">0,00 €</div>
         <div class="ing-cuenta-sub">En cartera</div>
-        <div class="efectivo-quick">
-          <button class="ef-btn menos" onclick="ajustarEfectivo(-1)">−</button>
-          <div class="ef-input-wrap">
-            <input class="ef-input" id="efCambioInput" type="number" step="0.01" min="0" placeholder="0">
-            <span class="ef-euro">€</span>
+        <div style="margin-top:10px;">
+          <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gris-texto);margin-bottom:5px;">Fijar importe exacto</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <div class="ef-input-wrap" style="flex:1;">
+              <input class="ef-input" id="efCambioInput" type="number" step="0.01" min="0" placeholder="0,00">
+              <span class="ef-euro">€</span>
+            </div>
+            <button class="ef-guardar" onclick="guardarEfectivoManual()" style="white-space:nowrap;">✓ Guardar</button>
           </div>
-          <button class="ef-btn mas" onclick="ajustarEfectivo(1)">+</button>
-          <button class="ef-guardar" onclick="guardarEfectivoManual()">✓</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
+            <button class="ef-btn menos" onclick="ajustarEfectivo(-1)" style="width:100%;border-radius:8px;font-size:12px;font-weight:600;height:32px;">− Restar</button>
+            <button class="ef-btn mas" onclick="ajustarEfectivo(1)" style="width:100%;border-radius:8px;font-size:12px;font-weight:600;height:32px;">+ Añadir</button>
+          </div>
         </div>
       </div>
       <div class="ing-cuenta-card" style="border-top:3px solid var(--ingreso);background:var(--ingreso-light);">
@@ -1363,6 +1373,16 @@ function mostrarPantalla(p) {
 }
 
 // ── CONFIG ────────────────────────────────────────────────────────────────────
+function resetearEfectivo() {
+  const d = JSON.parse(localStorage.getItem("ing_data") || "{}");
+  d.efectivo = 0;
+  if (!d.tin) d.tin = 0.99;
+  ingData = { ...ingData, ...d };
+  localStorage.setItem("ing_data", JSON.stringify(ingData));
+  actualizarMiniSaldos();
+  mostrarToast("✅ Efectivo puesto a 0,00 €", "exito");
+}
+
 function abrirConfig() { document.getElementById("inputURL").value=scriptURL; document.getElementById("overlayConfig").classList.remove("oculto"); }
 function cerrarConfig() { document.getElementById("overlayConfig").classList.add("oculto"); }
 function guardarURL() {
@@ -1381,11 +1401,11 @@ function mostrarToast(msg, tipo="") {
 
 
 // ── ING ────────────────────────────────────────────────────────────────────
-let ingData = JSON.parse(localStorage.getItem("ing_data") || JSON.stringify({
-  saldoNomina: 114.60,
-  saldoNaranja: 6199.12,
-  tin: 0.99
-}));
+// Forzar efectivo a 0 y resetear gastos acumulados del mes si es primera carga
+const _ingRaw = localStorage.getItem("ing_data");
+let ingData = _ingRaw ? JSON.parse(_ingRaw) : { saldoNomina: 114.60, saldoNaranja: 6199.12, efectivo: 0, tin: 0.99 };
+if (!ingData.tin) ingData.tin = 0.99;
+if (ingData.efectivo === undefined) ingData.efectivo = 0;
 
 function initING() {
   document.getElementById("inputSaldoNomina").value = ingData.saldoNomina;
@@ -1733,6 +1753,9 @@ function guardarObjetivo() {
 
 // ── ARRANQUE ──────────────────────────────────────────────────────────────────
 document.getElementById("pantallaRegistro").style.cssText="display:flex;flex-direction:column;gap:14px;";
+// Resetear efectivo a 0 si se pide explícitamente
+if (ingData.efectivo === undefined || ingData.efectivo === null) { ingData.efectivo = 0; }
+localStorage.setItem("ing_data", JSON.stringify(ingData));
 // Cargar gastos Tarjeta Oro iniciales si no hay ninguno guardado
 if (!localStorage.getItem("gastos_oro") || JSON.parse(localStorage.getItem("gastos_oro")).length === 0) {
   gastosOro = [{"fecha": "14/05/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "ocio", "categoria": "Ocio y viajes", "importe": "21.31", "desc": "OPENAI *CHATGPT SUBSCR - SAN FRANCISC"}, {"fecha": "14/05/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "otros_gst", "categoria": "Otros gastos", "importe": "5.99", "desc": "Prime Video *NA3NA2OE4 - MADRID"}, {"fecha": "11/05/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "ocio", "categoria": "Ocio y viajes", "importe": "27.30", "desc": "PICCOLA ITALIA - MERIDA"}, {"fecha": "11/05/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "ocio", "categoria": "Ocio y viajes", "importe": "7.70", "desc": "PASTELERIA MARQUESA DE PI - MERIDA"}, {"fecha": "07/05/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "otros_gst", "categoria": "Compras", "importe": "20.49", "desc": "WWW.AMAZON* N67B99WD4 - LUXEMBOURG"}, {"fecha": "07/05/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "otros_gst", "categoria": "Compras", "importe": "52.97", "desc": "PAYPAL *PRIVALIA ES"}, {"fecha": "06/05/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "ocio", "categoria": "Ocio y viajes", "importe": "35.99", "desc": "Grupo Zena Pizza - Madrid"}, {"fecha": "05/05/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "otros_gst", "categoria": "Compras", "importe": "40.00", "desc": "ROCODROMO CEREZA WALL - PLASENCIA"}, {"fecha": "05/05/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "otros_gst", "categoria": "Compras", "importe": "46.09", "desc": "WWW.AMAZON* N68428864 - LUXEMBOURG"}, {"fecha": "04/05/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "alimentacion", "categoria": "Alimentación", "importe": "7.92", "desc": "MERKOCASH PLASENCIA"}, {"fecha": "02/05/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "alimentacion", "categoria": "Alimentación", "importe": "18.53", "desc": "PAYPAL *TEMU 4029357733"}, {"fecha": "02/05/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "alimentacion", "categoria": "Alimentación", "importe": "54.90", "desc": "PAYPAL *IVBWELLNESS IV 635682803"}, {"fecha": "30/04/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "alimentacion", "categoria": "Alimentación", "importe": "20.41", "desc": "PAYPAL *TEMU 4029357733"}, {"fecha": "29/04/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "otros_gst", "categoria": "Compras", "importe": "131.70", "desc": "PAYPAL *MARSICOTTON MA 4029357733"}, {"fecha": "29/04/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "otros_gst", "categoria": "Compras", "importe": "64.44", "desc": "WWW.AMAZON*NN28246Q4 - LUXEMBOURG"}, {"fecha": "28/04/2026", "hora": "00:00:00", "tipo": "gasto", "cat": "alimentacion", "categoria": "Alimentación", "importe": "12.22", "desc": "ALDI PLASENCIA"}];
