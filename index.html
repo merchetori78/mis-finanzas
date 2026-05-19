@@ -1226,7 +1226,8 @@ async function enviarRegistro(tipo, cat, importe, desc) {
 
   if (scriptURL) {
     try {
-      await fetch(scriptURL + "?" + new URLSearchParams(registro).toString(), { method:"GET", mode:"no-cors" });
+      const registroSheet = { ...registro, importe: registro.importe.replace(".", ","), accion: "escribir" };
+      await fetch(scriptURL + "?" + new URLSearchParams(registroSheet).toString(), { method:"GET", mode:"no-cors" });
     } catch(e) {}
   }
 }
@@ -1703,15 +1704,16 @@ function actualizarBarraObjetivo() {
   const yaTengo = parseFloat(objData.yaTengo) || 0;
   const falta   = Math.max(0, meta - yaTengo);
   const pct     = meta > 0 ? Math.min(100, Math.round((yaTengo / meta) * 100)) : 0;
-  const nombre  = objData.nombre || "Sin nombre";
+  const nombre  = objData.nombre || (meta > 0 ? "Sin nombre" : "Configura tu objetivo abajo 👇");
   const fechaStr = objData.fecha;
 
   document.getElementById("objNombreLabel").textContent    = nombre;
-  document.getElementById("objAhorradoLabel").textContent  = yaTengo.toLocaleString("es-ES",{minimumFractionDigits:2}) + " €";
-  document.getElementById("objMetaLabel").textContent      = meta.toLocaleString("es-ES",{minimumFractionDigits:2}) + " €";
+  document.getElementById("objAhorradoLabel").textContent  = meta > 0 ? yaTengo.toLocaleString("es-ES",{minimumFractionDigits:2}) + " €" : "— €";
+  document.getElementById("objMetaLabel").textContent      = meta > 0 ? meta.toLocaleString("es-ES",{minimumFractionDigits:2}) + " €" : "— €";
   document.getElementById("objProgressFill").style.width   = pct + "%";
-  document.getElementById("objPct").textContent            = pct + "% completado";
-  document.getElementById("objFalta").textContent          = falta.toLocaleString("es-ES",{minimumFractionDigits:2}) + " €";
+  document.getElementById("objPct").textContent            = meta > 0 ? pct + "% completado" : "Introduce un objetivo para ver el progreso";
+  document.getElementById("objFalta").textContent          = meta > 0 ? falta.toLocaleString("es-ES",{minimumFractionDigits:2}) + " €" : "—";
+  document.getElementById("objMesesRestantes").textContent = objData.mensual > 0 && falta > 0 ? Math.ceil(falta / objData.mensual) + "m" : "—";
   document.getElementById("objFechaObj").textContent       = fechaStr
     ? new Date(fechaStr).toLocaleDateString("es-ES",{month:"short",year:"numeric"})
     : "—";
