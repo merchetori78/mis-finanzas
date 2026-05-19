@@ -855,7 +855,7 @@
         hora: movement.hora,
         tipo: movement.tipo,
         categoria: movement.categoria,
-        importe: movement.importe,
+        importe: String(movement.importe).replace(".", ","),
         descripcion: movement.descripcion,
         cuenta: movement.cuenta,
         cache: Date.now()
