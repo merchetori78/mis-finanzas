@@ -46,45 +46,48 @@
 
   /* ── HEADER ── */
   .header {
-    background: var(--gris-dark);
+    background: var(--blanco);
     padding: 18px 20px 20px;
     position: sticky; top: 0; z-index: 50;
+    border-bottom: 1px solid var(--gris-medio);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   }
   .header-top { display: flex; align-items: center; justify-content: space-between; }
   .header-titulo {
     font-family: "Playfair Display", serif;
-    font-size: 22px; color: white; letter-spacing: 0.3px;
+    font-size: 22px; color: var(--gris-dark); letter-spacing: 0.3px;
   }
   .header-mes {
-    font-size: 11px; color: rgba(255,255,255,0.5);
+    font-size: 11px; color: var(--gris-texto);
     letter-spacing: 2px; text-transform: uppercase; margin-top: 2px;
   }
 
   /* ── RESUMEN TARJETAS ── */
   .resumen-wrap {
-    background: var(--gris-dark);
-    padding: 0 16px 24px;
+    background: var(--blanco);
+    padding: 0 16px 20px;
+    border-bottom: 1px solid var(--gris-medio);
   }
-  .resumen-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .resumen-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding-top: 14px; }
 
   .resumen-card {
     border-radius: 12px;
     padding: 12px 10px;
     display: flex; flex-direction: column; gap: 4px;
   }
-  .resumen-card.ing  { background: rgba(13,148,136,0.15); border: 1px solid rgba(13,148,136,0.25); }
-  .resumen-card.gst  { background: rgba(225,29,72,0.15);  border: 1px solid rgba(225,29,72,0.25); }
-  .resumen-card.aho  { background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.25); }
+  .resumen-card.ing  { background: var(--ingreso-light); border: 1px solid rgba(13,148,136,0.25); }
+  .resumen-card.gst  { background: var(--gasto-light);   border: 1px solid rgba(225,29,72,0.25); }
+  .resumen-card.aho  { background: var(--ahorro-light);  border: 1px solid rgba(124,58,237,0.25); }
 
   .resumen-label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; }
-  .resumen-card.ing .resumen-label { color: #5eead4; }
-  .resumen-card.gst .resumen-label { color: #fda4af; }
-  .resumen-card.aho .resumen-label { color: #c4b5fd; }
+  .resumen-card.ing .resumen-label { color: var(--ingreso-dark); }
+  .resumen-card.gst .resumen-label { color: var(--gasto-dark); }
+  .resumen-card.aho .resumen-label { color: var(--ahorro-dark); }
 
   .resumen-valor { font-family: "Playfair Display", serif; font-size: 16px; font-weight: 700; }
-  .resumen-card.ing .resumen-valor { color: #5eead4; }
-  .resumen-card.gst .resumen-valor { color: #fda4af; }
-  .resumen-card.aho .resumen-valor { color: #c4b5fd; }
+  .resumen-card.ing .resumen-valor { color: var(--ingreso-dark); }
+  .resumen-card.gst .resumen-valor { color: var(--gasto-dark); }
+  .resumen-card.aho .resumen-valor { color: var(--ahorro-dark); }
 
   /* ── MAIN ── */
   main { flex: 1; padding: 16px 16px 100px; display: flex; flex-direction: column; gap: 14px; max-width: 480px; width: 100%; margin: 0 auto; }
@@ -558,22 +561,22 @@
     </div>
   </div>
   <!-- Saldos ING mini -->
-  <div style="display:flex;gap:8px;margin-top:10px;">
-    <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:8px;padding:8px 10px;">
-      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.45);">Nómina</div>
-      <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:white;margin-top:2px;" id="miniNomina">114,60 €</div>
+  <div style="display:flex;gap:8px;margin-top:12px;">
+    <div style="flex:1;background:var(--gris-claro);border:1px solid var(--gris-medio);border-radius:8px;padding:8px 10px;">
+      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gris-texto);">Nómina</div>
+      <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--gris-dark);margin-top:2px;" id="miniNomina">114,60 €</div>
     </div>
-    <div style="flex:1;background:rgba(217,119,6,0.2);border:1px solid rgba(217,119,6,0.3);border-radius:8px;padding:8px 10px;cursor:pointer;" onclick="mostrarPantalla('tarjeta')">
-      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(251,191,36,0.8);">T. Oro</div>
-      <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#fbbf24;margin-top:2px;" id="miniOro">0,00 €</div>
+    <div style="flex:1;background:var(--dorado-light);border:1px solid #fcd34d;border-radius:8px;padding:8px 10px;cursor:pointer;" onclick="mostrarPantalla('tarjeta')">
+      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#92400e;">T. Oro</div>
+      <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#92400e;margin-top:2px;" id="miniOro">0,00 €</div>
     </div>
-    <div style="flex:1;background:rgba(255,102,0,0.2);border:1px solid rgba(255,102,0,0.3);border-radius:8px;padding:8px 10px;">
-      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,150,80,0.8);">Naranja</div>
-      <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#fdba74;margin-top:2px;" id="miniNaranja">6.199,12 €</div>
+    <div style="flex:1;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:8px 10px;">
+      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#c2410c;">Naranja</div>
+      <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#ea580c;margin-top:2px;" id="miniNaranja">6.199,12 €</div>
     </div>
-    <div style="flex:1;background:rgba(217,119,6,0.15);border:1px solid rgba(217,119,6,0.3);border-radius:8px;padding:8px 10px;">
-      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(217,180,100,0.8);">Efectivo</div>
-      <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#fcd34d;margin-top:2px;" id="miniEfectivo">0,00 €</div>
+    <div style="flex:1;background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:8px 10px;">
+      <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#854d0e;">Efectivo</div>
+      <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#a16207;margin-top:2px;" id="miniEfectivo">0,00 €</div>
     </div>
   </div>
 </div>
@@ -819,15 +822,21 @@
 <div class="ajustes-wrap" id="pantallaObjetivo" style="gap:0;padding-top:16px;">
   <div style="padding:0 0 14px;">
 
-    <!-- Barra de progreso -->
+    <!-- Estado actual del objetivo -->
     <div class="card" style="margin-bottom:12px;">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
-        <div class="seccion-label" style="margin:0;">Mi objetivo</div>
-        <div style="font-size:12px;color:var(--gris-texto);" id="objNombreLabel">—</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="seccion-label" style="margin:0;">🎯 Mi objetivo</div>
+        <div style="font-size:12px;color:var(--gris-texto);font-weight:500;" id="objNombreLabel">Sin nombre</div>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
-        <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--ahorro-dark);" id="objAhorradoLabel">0 €</div>
-        <div style="font-size:13px;color:var(--gris-texto);">de <span id="objMetaLabel" style="font-weight:600;color:var(--gris-dark);">0 €</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px;">
+        <div>
+          <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gris-texto);">Ahorrado</div>
+          <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--ahorro-dark);line-height:1.1;" id="objAhorradoLabel">0,00 €</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gris-texto);">Objetivo</div>
+          <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--gris-dark);" id="objMetaLabel">0,00 €</div>
+        </div>
       </div>
       <div class="obj-progress-wrap">
         <div class="obj-progress-track">
@@ -835,8 +844,6 @@
         </div>
         <div class="obj-pct" id="objPct">0% completado</div>
       </div>
-
-      <!-- Stats rápidos -->
       <div class="obj-stats-grid">
         <div class="obj-stat">
           <div class="obj-stat-valor" id="objFalta">—</div>
@@ -848,15 +855,23 @@
         </div>
         <div class="obj-stat">
           <div class="obj-stat-valor" id="objFechaObj">—</div>
-          <div class="obj-stat-label">Fecha</div>
+          <div class="obj-stat-label">Fecha límite</div>
         </div>
       </div>
     </div>
 
+    <!-- Saldo Naranja vinculado -->
+    <div style="background:linear-gradient(135deg,#fff7ed,#ffedd5);border:1px solid #fed7aa;border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#c2410c;">💰 Saldo Cuenta Naranja</div>
+        <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#ea580c;margin-top:2px;" id="objSaldoNaranja">—</div>
+      </div>
+      <button onclick="sincronizarSaldoObjetivo()" style="background:#ff6200;border:none;border-radius:8px;padding:8px 12px;color:white;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">🔄 Sincronizar</button>
+    </div>
+
     <!-- Calculadora -->
     <div class="card" style="margin-bottom:12px;">
-      <div class="seccion-label">Calculadora</div>
-
+      <div class="seccion-label">✏️ Configurar objetivo</div>
       <div class="obj-fields-grid">
         <div class="obj-field">
           <label>Objetivo (€)</label>
@@ -875,30 +890,28 @@
           <input type="date" id="inputFecha" oninput="calcularObjetivo()" style="font-size:13px;font-family:'DM Sans',sans-serif;">
         </div>
       </div>
-
       <div class="obj-field" style="margin-top:4px;">
         <label>Nombre del objetivo</label>
         <input type="text" id="inputNombreObj" placeholder="Ej: Vacaciones, Coche, Reforma..." oninput="calcularObjetivo()" style="font-family:'DM Sans',sans-serif;font-size:14px;">
       </div>
     </div>
 
-    <!-- Resultados -->
+    <!-- Resultados calculadora -->
     <div class="obj-resultado" id="objResultado" style="display:none;">
       <div class="obj-resultado-titulo">📊 Resultados</div>
       <div class="obj-resultado-grid">
         <div class="obj-res-item">
           <div class="obj-res-valor" id="resAhorroMes">—</div>
-          <div class="obj-res-label">€/mes necesarios</div>
+          <div class="obj-res-label">€/mes para llegar a fecha</div>
         </div>
         <div class="obj-res-item">
           <div class="obj-res-valor" id="resFechaLogro">—</div>
-          <div class="obj-res-label">Fecha si ahorras ese importe</div>
+          <div class="obj-res-label">Llegarías con tu ahorro/mes</div>
         </div>
       </div>
-      <div class="obj-aviso" id="objAviso" style="display:none;"></div>
+      <div class="obj-aviso" id="objAviso" style="display:none;margin-top:10px;"></div>
     </div>
 
-    <!-- Botón guardar objetivo -->
     <button class="btn-guardar modo-ahorro" style="margin-top:14px;" onclick="guardarObjetivo()">
       Guardar objetivo
     </button>
@@ -1250,9 +1263,9 @@ function actualizarResumen() {
       else if (r.tipo === "Ahorro") aho += imp;
     }
   });
-  document.getElementById("resIngreso").textContent = ing.toFixed(0) + " €";
-  document.getElementById("resGasto").textContent = gst.toFixed(0) + " €";
-  document.getElementById("resAhorro").textContent = aho.toFixed(0) + " €";
+  document.getElementById("resIngreso").textContent = ing.toFixed(2) + " €";
+  document.getElementById("resGasto").textContent = gst.toFixed(2) + " €";
+  document.getElementById("resAhorro").textContent = aho.toFixed(2) + " €";
   actualizarMiniSaldos();
 }
 
@@ -1440,30 +1453,39 @@ async function registrarIntereses() {
 
 // ── EFECTIVO RÁPIDO ───────────────────────────────────────────────────────────
 function ajustarEfectivo(signo) {
-  const d = JSON.parse(localStorage.getItem("ing_data") || "{}");
   const cambio = parseFloat(document.getElementById("efCambioInput").value) || 0;
   if (cambio <= 0) { mostrarToast("⚠️ Introduce un importe", "error"); return; }
+  const d = JSON.parse(localStorage.getItem("ing_data") || "{}");
   let ef = parseFloat(d.efectivo || 0);
-  ef = Math.max(0, ef + signo * cambio);
-  d.efectivo = parseFloat(ef.toFixed(2));
-  ingData = d;
-  localStorage.setItem("ing_data", JSON.stringify(d));
-  actualizarMiniSaldos();
-  if (document.getElementById("pantallaING").classList.contains("visible")) initING();
+  ef = Math.max(0, parseFloat((ef + signo * cambio).toFixed(2)));
+  d.efectivo = ef;
+  ingData = { ...ingData, ...d };
+  localStorage.setItem("ing_data", JSON.stringify(ingData));
   document.getElementById("efCambioInput").value = "";
+  document.getElementById("saldoEfectivo").textContent = ef.toLocaleString("es-ES", {minimumFractionDigits:2}) + " €";
+  const sN = parseFloat(ingData.saldoNomina || 0);
+  const sO = parseFloat(ingData.saldoNaranja || 0);
+  document.getElementById("saldoTotal").textContent = (sN + sO + ef).toLocaleString("es-ES", {minimumFractionDigits:2}) + " €";
+  document.getElementById("inputEfectivo").value = ef;
+  actualizarMiniSaldos();
   mostrarToast((signo > 0 ? "✅ +" : "✅ -") + cambio.toFixed(2) + " € en efectivo", "exito");
 }
 
 function guardarEfectivoManual() {
-  const d = JSON.parse(localStorage.getItem("ing_data") || "{}");
   const val = parseFloat(document.getElementById("efCambioInput").value);
   if (isNaN(val) || val < 0) { mostrarToast("⚠️ Importe no válido", "error"); return; }
+  const d = JSON.parse(localStorage.getItem("ing_data") || "{}");
   d.efectivo = parseFloat(val.toFixed(2));
-  ingData = d;
-  localStorage.setItem("ing_data", JSON.stringify(d));
-  actualizarMiniSaldos();
-  if (document.getElementById("pantallaING").classList.contains("visible")) initING();
+  ingData = { ...ingData, ...d };
+  localStorage.setItem("ing_data", JSON.stringify(ingData));
   document.getElementById("efCambioInput").value = "";
+  // Actualizar displays directamente sin releer desde inputs
+  document.getElementById("saldoEfectivo").textContent = val.toLocaleString("es-ES", {minimumFractionDigits:2}) + " €";
+  const sN = parseFloat(ingData.saldoNomina || 0);
+  const sO = parseFloat(ingData.saldoNaranja || 0);
+  document.getElementById("saldoTotal").textContent = (sN + sO + val).toLocaleString("es-ES", {minimumFractionDigits:2}) + " €";
+  document.getElementById("inputEfectivo").value = val;
+  actualizarMiniSaldos();
   mostrarToast("✅ Efectivo actualizado a " + val.toFixed(2) + " €", "exito");
 }
 
@@ -1579,12 +1601,27 @@ function initObjetivo() {
   document.getElementById("inputFecha").value      = objData.fecha     || "";
   document.getElementById("inputNombreObj").value  = objData.nombre    || "";
 
-  // Sincronizar yaTengo con saldo Naranja actual
+  // Mostrar saldo Naranja actual
   const d = JSON.parse(localStorage.getItem("ing_data") || "{}");
+  const sN = parseFloat(d.saldoNaranja || 6199.12);
+  const el = document.getElementById("objSaldoNaranja");
+  if (el) el.textContent = sN.toLocaleString("es-ES", {minimumFractionDigits:2}) + " €";
+
+  // Sincronizar yaTengo con saldo Naranja si no hay valor guardado
   if (d.saldoNaranja && !objData.yaTengo) {
     document.getElementById("inputYaTengo").value = d.saldoNaranja;
   }
   calcularObjetivo();
+}
+
+function sincronizarSaldoObjetivo() {
+  const d = JSON.parse(localStorage.getItem("ing_data") || "{}");
+  const sN = parseFloat(d.saldoNaranja || 0);
+  document.getElementById("inputYaTengo").value = sN;
+  const el = document.getElementById("objSaldoNaranja");
+  if (el) el.textContent = sN.toLocaleString("es-ES", {minimumFractionDigits:2}) + " €";
+  calcularObjetivo();
+  mostrarToast("✅ Sincronizado con Cuenta Naranja: " + sN.toFixed(2) + " €", "exito");
 }
 
 function calcularObjetivo() {
