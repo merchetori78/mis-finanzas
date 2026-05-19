@@ -1090,12 +1090,11 @@ function renderCategorias() {
   const grid = document.getElementById("catGrid");
   const cats = CATS[tipoActual];
   catActual = cats[0].id;
-  grid.innerHTML = cats.map(c => `
-    <button class="cat-btn ${c.id === catActual ? "active-" + TIPO_COLOR[tipoActual] : ""}"
-      id="cat_${c.id}" onclick="selCat('${c.id}')">
-      <span class="c-icon">${c.icon}</span>${c.label}
-    </button>
-  `).join("");
+  grid.innerHTML = cats.map(c => {
+    const activa = c.id === catActual ? " active-" + TIPO_COLOR[tipoActual] : "";
+    return "<button class="cat-btn" + activa + "" id="cat_" + c.id + "" onclick="selCat('" + c.id + "')">"
+      + "<span class="c-icon">" + c.icon + "</span>" + c.label + "</button>";
+  }).join("");
 }
 
 function selCat(id) {
@@ -1302,23 +1301,19 @@ function renderHistorial() {
   lista.innerHTML = datos.map(r => {
     const tc = TIPO_COLOR[r.tipo.toLowerCase()] || "ing";
     const idxReal = historial.indexOf(r);
-    return `
-      <div class="mov-item" style="position:relative;">
-        <div class="mov-icono ${tc}">${getCatIcon(r.tipo.toLowerCase(), Object.keys(CATS[r.tipo.toLowerCase()]||{}).find(k=>getCatLabel(r.tipo.toLowerCase(),k)===r.categoria)||r.categoria)}</div>
-        <div class="mov-info">
-          <div class="mov-desc">${r.descripcion}</div>
-          <div class="mov-meta">${r.categoria} · ${r.fecha} ${r.hora}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">
-          <div class="mov-importe ${tc}">${r.tipo==="Gasto"?"-":"+"} ${parseFloat(r.importe).toFixed(2)} €</div>
-          <button onclick="eliminarMovimiento(${idxReal})"
-            style="background:#fee2e2;border:1px solid #fca5a5;border-radius:6px;padding:3px 8px;
-            color:#dc2626;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">
-            🗑️
-          </button>
-        </div>
-      </div>
-    `;
+    const icono = getCatIcon(r.tipo.toLowerCase(), Object.keys(CATS[r.tipo.toLowerCase()]||{}).find(k=>getCatLabel(r.tipo.toLowerCase(),k)===r.categoria)||r.categoria);
+    const signo = r.tipo === "Gasto" ? "-" : "+";
+    const imp = parseFloat(r.importe).toFixed(2);
+    return "<div class="mov-item" style="position:relative;">"
+      + "<div class="mov-icono " + tc + "">" + icono + "</div>"
+      + "<div class="mov-info">"
+      + "<div class="mov-desc">" + r.descripcion + "</div>"
+      + "<div class="mov-meta">" + r.categoria + " · " + r.fecha + " " + r.hora + "</div>"
+      + "</div>"
+      + "<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">"
+      + "<div class="mov-importe " + tc + "">" + signo + " " + imp + " €</div>"
+      + "<button onclick="eliminarMovimiento(" + idxReal + ")" style="background:#fee2e2;border:1px solid #fca5a5;border-radius:6px;padding:3px 8px;color:#dc2626;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">🗑️</button>"
+      + "</div></div>";
   }).join("");
 }
 
