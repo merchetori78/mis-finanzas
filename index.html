@@ -606,6 +606,8 @@
                   <option value="Tarjeta débito ING">Tarjeta débito ING</option>
                   <option value="Tarjeta crédito ING">Tarjeta crédito ING</option>
                   <option value="Efectivo monedero">Efectivo monedero</option>
+                  <option value="Cuenta mini Jara">Cuenta mini Jara</option>
+                  <option value="Cuenta mini Pablo">Cuenta mini Pablo</option>
                 </select>
               </label>
               <label>Importe
@@ -664,6 +666,7 @@
                 <th>Cuenta</th>
                 <th>Importe</th>
                 <th>Descripción</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody id="movementsTable"></tbody>
@@ -752,7 +755,9 @@
       { id: "Cuenta naranja ING", label: "Cuenta naranja", emoji: "🍊", pill: "orange", type: "Ahorro" },
       { id: "Tarjeta débito ING", label: "Tarjeta débito", emoji: "💳", pill: "green", type: "Tarjeta" },
       { id: "Tarjeta crédito ING", label: "Tarjeta crédito", emoji: "💳", pill: "yellow", type: "Crédito" },
-      { id: "Efectivo monedero", label: "Monedero", emoji: "👛", pill: "blue", type: "Efectivo" }
+      { id: "Efectivo monedero", label: "Monedero", emoji: "👛", pill: "blue", type: "Efectivo" },
+      { id: "Cuenta mini Jara", label: "Cuenta mini Jara", emoji: "🌼", pill: "green", type: "Hijos" },
+      { id: "Cuenta mini Pablo", label: "Cuenta mini Pablo", emoji: "🚀", pill: "blue", type: "Hijos" }
     ];
 
     const euro = new Intl.NumberFormat("es-ES", {
@@ -946,7 +951,7 @@
       });
 
       if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="7" class="empty">Todavía no hay movimientos para mostrar.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="empty">Todavía no hay movimientos para mostrar.</td></tr>`;
         return;
       }
 
@@ -962,6 +967,7 @@
             <td>${escapeHtml(m.cuenta || "")}</td>
             <td class="amount ${cls}">${sign} ${euro.format(Number(m.importe || 0))}</td>
             <td>${escapeHtml(m.descripcion || "")}</td>
+            <td><button class="secondary" type="button" onclick="deleteMovement('${m.id}')">Eliminar</button></td>
           </tr>
         `;
       }).join("");
@@ -1021,6 +1027,14 @@
       document.getElementById("balancesDialog").close();
       renderAll();
       showToast("Saldos iniciales actualizados.");
+    }
+
+    function deleteMovement(id) {
+      if (!confirm("¿Seguro que quieres eliminar este movimiento de la app?")) return;
+      movements = movements.filter(m => m.id !== id);
+      writeStorage(STORAGE_KEYS.movements, movements);
+      renderAll();
+      showToast("Movimiento eliminado de la app. Puedes volver a introducirlo para enviarlo al Sheet.");
     }
 
     function renderAll() {
