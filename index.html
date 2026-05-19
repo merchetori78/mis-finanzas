@@ -863,27 +863,23 @@
 
       const url = `${scriptUrl}?${params.toString()}`;
 
-      try {
-        await fetch(url, { method: "GET", mode: "no-cors" });
-        return true;
-      } catch (error) {
-        try {
-          await sendWithBeaconImage(url);
-          return true;
-        } catch (secondError) {
-          showToast("No se pudo enviar a Google Sheets. Revisa permisos y despliegue del Apps Script.");
-          return false;
-        }
-      }
+      // Método más fiable en GitHub Pages para Apps Script:
+      // cargar la URL en un iframe oculto. Aunque no podamos leer la respuesta por CORS,
+      // la petición GET sí se ejecuta y Apps Script añade la fila.
+      return sendWithHiddenIframe(url);
     }
 
-    function sendWithBeaconImage(url) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = resolve;
-        img.onerror = resolve;
-        img.src = url;
-        setTimeout(resolve, 1800);
+    function sendWithHiddenIframe(url) {
+      return new Promise((resolve) => {
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = url;
+        document.body.appendChild(iframe);
+
+        setTimeout(() => {
+          iframe.remove();
+          resolve(true);
+        }, 2500);
       });
     }
 
