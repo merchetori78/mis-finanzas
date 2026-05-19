@@ -1,59 +1,1051 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Mis Finanzas">
-<meta name="theme-color" content="#ffffff">
-<title>Mis Finanzas Personales</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --ingreso: #0d9488;
-    --ingreso-light: #ccfbf1;
-    --ingreso-dark: #0f766e;
-    --gasto: #e11d48;
-    --gasto-light: #ffe4e6;
-    --gasto-dark: #be123c;
-    --ahorro: #7c3aed;
-    --ahorro-light: #ede9fe;
-    --ahorro-dark: #6d28d9;
-    --dorado: #d97706;
-    --dorado-light: #fef3c7;
-    --blanco: #ffffff;
-    --gris-claro: #f8fafc;
-    --gris-medio: #e2e8f0;
-    --gris-texto: #64748b;
-    --gris-dark: #1e293b;
-    --radio: 16px;
-    --sombra: 0 2px 12px rgba(0,0,0,0.07);
-    --sombra-md: 0 4px 24px rgba(0,0,0,0.1);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body {
-    background: var(--gris-claro);
-    color: var(--gris-dark);
-    font-family: "DM Sans", sans-serif;
-    min-height: 100vh; min-height: 100dvh;
-    display: flex; flex-direction: column;
-    overflow-x: hidden;
-  }
-  .header {
-    background: var(--blanco);
-    padding: 18px 20px 20px;
-    position: sticky; top: 0; z-index: 50;
-    border-bottom: 1px solid var(--gris-medio);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  }
-  .header-top { display: flex; align-items: center; justify-content: space-between; }
-  .header-titulo { font-family: "Playfair Display", serif; font-size: 22px; color: var(--gris-dark); letter-spacing: 0.3px; }
-  .header-mes { font-size: 11px; color: var(--gris-texto); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
-  .resumen-wrap { background: var(--blanco); padding: 0 16px 20px; border-bottom: 1px solid var(--gris-medio); }
-  .resumen-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding-top: 14px; }
-  .resumen-card { border-radius: 12px; padding: 12px 10px; display: flex; flex-direction: column; gap: 4px; }
-  .resumen-card.ing  { background: var(--ingreso-light); border: 1px solid rgba(13,148,136,0.25); }
-  .resumen-card.gst  { background: var(--gasto-light);   border: 1px solid rgba(225,29,72,0.25); }
-  .resumen-card.aho  { background: var(--ahorro-light);  border: 1px solid rgba(124,58,237,0.
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mis Finanzas Personales</title>
+  <style>
+    :root {
+      --bg: #f6f9fb;
+      --card: #ffffff;
+      --text: #24313d;
+      --muted: #6b7a86;
+      --line: #dfe8ef;
+      --primary: #ff8a3d;
+      --primary-soft: #fff0e6;
+      --green: #16a34a;
+      --green-soft: #e8f7ee;
+      --blue: #2563eb;
+      --blue-soft: #eaf1ff;
+      --yellow: #ca8a04;
+      --yellow-soft: #fff7d6;
+      --red: #dc2626;
+      --red-soft: #ffeaea;
+      --shadow: 0 12px 30px rgba(31, 49, 68, 0.08);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #f9fbfd 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .app {
+      width: min(1200px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--primary), #ffd1a6);
+      display: grid;
+      place-items: center;
+      box-shadow: var(--shadow);
+      font-size: 26px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.55rem, 4vw, 2.25rem);
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: #edf3f7;
+      padding: 6px;
+      border-radius: 999px;
+    }
+
+    .tab-btn {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--card);
+      color: var(--primary);
+      box-shadow: 0 8px 18px rgba(31, 49, 68, 0.08);
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(4, 1fr);
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(223, 232, 239, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 116px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 10px;
+      font-size: 1.7rem;
+      letter-spacing: -0.04em;
+    }
+
+    .metric .icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 21px;
+      background: var(--primary-soft);
+    }
+
+    .panel-grid {
+      grid-template-columns: 1.05fr 1.6fr;
+      align-items: start;
+    }
+
+    h2, h3 {
+      margin: 0 0 14px;
+      letter-spacing: -0.03em;
+    }
+
+    h2 {
+      font-size: 1.35rem;
+    }
+
+    h3 {
+      font-size: 1.08rem;
+    }
+
+    form {
+      display: grid;
+      gap: 13px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 13px;
+      font: inherit;
+      color: var(--text);
+      background: #fbfdff;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(255, 138, 61, 0.14);
+      background: #fff;
+    }
+
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    button.primary {
+      border: 0;
+      background: linear-gradient(135deg, var(--primary), #ffb36f);
+      color: white;
+      padding: 13px 16px;
+      border-radius: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 12px 20px rgba(255, 138, 61, 0.25);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    button.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 28px rgba(255, 138, 61, 0.32);
+    }
+
+    button.secondary {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .accounts {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .account {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 15px;
+      background: #fbfdff;
+    }
+
+    .account-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 900;
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    .pill.orange {
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .pill.green {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .pill.yellow {
+      background: var(--yellow-soft);
+      color: var(--yellow);
+    }
+
+    .pill.red {
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .account strong {
+      display: block;
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+    }
+
+    .account small {
+      color: var(--muted);
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+      background: #fff;
+    }
+
+    th, td {
+      padding: 12px 13px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 0.92rem;
+    }
+
+    th {
+      color: var(--muted);
+      background: #f7fafc;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .amount.income {
+      color: var(--green);
+      font-weight: 900;
+    }
+
+    .amount.expense {
+      color: var(--red);
+      font-weight: 900;
+    }
+
+    .amount.transfer {
+      color: var(--blue);
+      font-weight: 900;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+
+    .filters select, .filters input {
+      width: auto;
+      min-width: 150px;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fade 0.25s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .goals-grid {
+      grid-template-columns: 1fr 1.4fr;
+      align-items: start;
+    }
+
+    .goal-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .goal {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 15px;
+      background: #fbfdff;
+    }
+
+    .goal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .goal-title {
+      font-weight: 900;
+    }
+
+    .progress {
+      height: 12px;
+      background: #e9f0f5;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--primary), #ffd1a6);
+      transition: width 0.3s ease;
+    }
+
+    .goal-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .settings-note {
+      color: var(--muted);
+      line-height: 1.5;
+      background: #f7fafc;
+      border: 1px dashed var(--line);
+      padding: 14px;
+      border-radius: 16px;
+      margin-top: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: #23313d;
+      color: white;
+      padding: 14px 16px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      display: none;
+      max-width: 340px;
+      z-index: 10;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    .empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 26px;
+    }
+
+    @media (max-width: 980px) {
+      header, .panel-grid, .goals-grid {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .panel-grid, .goals-grid {
+        display: grid;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .app {
+        width: min(100% - 20px, 1200px);
+        padding-top: 18px;
+      }
+
+      .summary-grid, .accounts, .row {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs {
+        width: 100%;
+        border-radius: 18px;
+      }
+
+      .tab-btn {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">💶</div>
+        <div>
+          <h1>Mis Finanzas</h1>
+          <p class="subtitle">Cuentas, tarjetas, efectivo y metas de ahorro en un panel claro.</p>
+        </div>
+      </div>
+      <nav class="tabs" aria-label="Pestañas principales">
+        <button class="tab-btn active" data-tab="dashboard">Panel</button>
+        <button class="tab-btn" data-tab="movements">Movimientos</button>
+        <button class="tab-btn" data-tab="goals">Metas de ahorro</button>
+        <button class="tab-btn" data-tab="settings">Ajustes</button>
+      </nav>
+    </header>
+
+    <section id="dashboard" class="tab-content active">
+      <div class="grid summary-grid">
+        <article class="card metric">
+          <div>
+            <span>Patrimonio total</span>
+            <strong id="totalBalance">0,00 €</strong>
+          </div>
+          <div class="icon">🏦</div>
+        </article>
+        <article class="card metric">
+          <div>
+            <span>Ingresos del mes</span>
+            <strong id="monthIncome">0,00 €</strong>
+          </div>
+          <div class="icon">📈</div>
+        </article>
+        <article class="card metric">
+          <div>
+            <span>Gastos del mes</span>
+            <strong id="monthExpense">0,00 €</strong>
+          </div>
+          <div class="icon">🧾</div>
+        </article>
+        <article class="card metric">
+          <div>
+            <span>Disponible ahora</span>
+            <strong id="availableNow">0,00 €</strong>
+          </div>
+          <div class="icon">👛</div>
+        </article>
+      </div>
+
+      <div class="grid panel-grid">
+        <article class="card">
+          <h2>Nuevo movimiento</h2>
+          <form id="movementForm">
+            <div class="row">
+              <label>Fecha
+                <input type="date" id="fecha" required />
+              </label>
+              <label>Hora
+                <input type="time" id="hora" required />
+              </label>
+            </div>
+
+            <div class="row">
+              <label>Tipo
+                <select id="tipo" required>
+                  <option value="Gasto">Gasto</option>
+                  <option value="Ingreso">Ingreso</option>
+                  <option value="Transferencia">Transferencia</option>
+                </select>
+              </label>
+              <label>Categoría
+                <select id="categoria" required>
+                  <option>Alimentación</option>
+                  <option>Casa</option>
+                  <option>Transporte</option>
+                  <option>Trabajo</option>
+                  <option>Ocio</option>
+                  <option>Salud</option>
+                  <option>Viajes</option>
+                  <option>Nómina</option>
+                  <option>Ahorro</option>
+                  <option>Otros</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="row">
+              <label>Cuenta / tarjeta
+                <select id="cuenta" required>
+                  <option value="Cuenta nómina ING">Cuenta nómina ING</option>
+                  <option value="Cuenta naranja ING">Cuenta naranja ING</option>
+                  <option value="Tarjeta débito ING">Tarjeta débito ING</option>
+                  <option value="Tarjeta crédito ING">Tarjeta crédito ING</option>
+                  <option value="Efectivo monedero">Efectivo monedero</option>
+                </select>
+              </label>
+              <label>Importe
+                <input type="number" id="importe" step="0.01" min="0" placeholder="Ej. 24,50" required />
+              </label>
+            </div>
+
+            <label>Descripción
+              <textarea id="descripcion" placeholder="Ej. Compra semanal, gasolina, cena..."></textarea>
+            </label>
+
+            <button class="primary" type="submit">Guardar movimiento</button>
+          </form>
+        </article>
+
+        <article class="card">
+          <div class="toolbar">
+            <h2>Cuentas y saldos</h2>
+            <button class="secondary" id="editBalancesBtn" type="button">Editar saldos iniciales</button>
+          </div>
+          <div class="accounts" id="accountsList"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="movements" class="tab-content">
+      <article class="card">
+        <div class="toolbar">
+          <h2>Movimientos</h2>
+          <div class="filters">
+            <select id="filterType">
+              <option value="">Todos los tipos</option>
+              <option value="Ingreso">Ingresos</option>
+              <option value="Gasto">Gastos</option>
+              <option value="Transferencia">Transferencias</option>
+            </select>
+            <select id="filterAccount">
+              <option value="">Todas las cuentas</option>
+              <option>Cuenta nómina ING</option>
+              <option>Cuenta naranja ING</option>
+              <option>Tarjeta débito ING</option>
+              <option>Tarjeta crédito ING</option>
+              <option>Efectivo monedero</option>
+            </select>
+            <input id="searchText" type="search" placeholder="Buscar..." />
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Tipo</th>
+                <th>Categoría</th>
+                <th>Cuenta</th>
+                <th>Importe</th>
+                <th>Descripción</th>
+              </tr>
+            </thead>
+            <tbody id="movementsTable"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section id="goals" class="tab-content">
+      <div class="grid goals-grid">
+        <article class="card">
+          <h2>Nueva meta de ahorro</h2>
+          <form id="goalForm">
+            <label>Nombre de la meta
+              <input id="goalName" placeholder="Ej. Viaje, colchón, reforma..." required />
+            </label>
+            <div class="row">
+              <label>Objetivo
+                <input id="goalTarget" type="number" step="0.01" min="0" required />
+              </label>
+              <label>Ahorrado ahora
+                <input id="goalSaved" type="number" step="0.01" min="0" value="0" required />
+              </label>
+            </div>
+            <label>Fecha objetivo
+              <input id="goalDate" type="date" />
+            </label>
+            <button class="primary" type="submit">Guardar meta</button>
+          </form>
+        </article>
+
+        <article class="card">
+          <div class="toolbar">
+            <h2>Mis metas</h2>
+            <button class="secondary" id="clearGoalsBtn" type="button">Vaciar metas</button>
+          </div>
+          <div class="goal-list" id="goalList"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="settings" class="tab-content">
+      <article class="card">
+        <h2>Ajustes de conexión con Google Sheets</h2>
+        <form id="settingsForm">
+          <label>URL de tu Apps Script desplegado como aplicación web
+            <input id="scriptUrl" type="url" placeholder="https://script.google.com/macros/s/XXXX/exec" />
+          </label>
+          <button class="primary" type="submit">Guardar URL</button>
+        </form>
+        <div class="settings-note">
+          <strong>Importante:</strong> pega aquí la URL que obtienes al desplegar tu Apps Script como aplicación web. Tu script actual guarda Fecha, Hora, Tipo, Categoría, Importe y Descripción. Esta app también guarda la cuenta usada en el navegador para poder calcular saldos, pero no se enviará a Sheets salvo que amplíes tu Apps Script.
+        </div>
+        <div class="settings-note">
+          Para guardar también la cuenta en Sheets, añade una columna nueva llamada <strong>Cuenta</strong> y cambia tu <code>appendRow</code> a:<br><br>
+          <code>hoja.appendRow([p.fecha, p.hora, p.tipo, p.categoria, p.importe, p.descripcion, p.cuenta]);</code>
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <dialog id="balancesDialog" style="border:0;border-radius:22px;padding:0;box-shadow:0 24px 60px rgba(31,49,68,.25);width:min(520px,calc(100% - 28px));">
+    <form method="dialog" class="card" style="box-shadow:none;border:0;">
+      <h2>Saldos iniciales</h2>
+      <p class="subtitle" style="margin-bottom:14px;">Pon el saldo actual de cada cuenta. Después la app irá sumando/restando movimientos.</p>
+      <div id="balancesFields" class="grid"></div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+        <button class="secondary" value="cancel" type="submit">Cancelar</button>
+        <button class="primary" id="saveBalancesBtn" value="default" type="button">Guardar saldos</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    const STORAGE_KEYS = {
+      movements: "finanzas_movimientos_v1",
+      balances: "finanzas_saldos_v1",
+      goals: "finanzas_metas_v1",
+      scriptUrl: "finanzas_script_url_v1"
+    };
+
+    const ACCOUNT_CONFIG = [
+      { id: "Cuenta nómina ING", label: "Cuenta nómina", emoji: "🏦", pill: "orange", type: "Cuenta" },
+      { id: "Cuenta naranja ING", label: "Cuenta naranja", emoji: "🍊", pill: "orange", type: "Ahorro" },
+      { id: "Tarjeta débito ING", label: "Tarjeta débito", emoji: "💳", pill: "green", type: "Tarjeta" },
+      { id: "Tarjeta crédito ING", label: "Tarjeta crédito", emoji: "💳", pill: "yellow", type: "Crédito" },
+      { id: "Efectivo monedero", label: "Monedero", emoji: "👛", pill: "blue", type: "Efectivo" }
+    ];
+
+    const euro = new Intl.NumberFormat("es-ES", {
+      style: "currency",
+      currency: "EUR"
+    });
+
+    let movements = readStorage(STORAGE_KEYS.movements, []);
+    let balances = readStorage(STORAGE_KEYS.balances, defaultBalances());
+    let goals = readStorage(STORAGE_KEYS.goals, []);
+
+    const today = new Date();
+    document.getElementById("fecha").valueAsDate = today;
+    document.getElementById("hora").value = today.toTimeString().slice(0, 5);
+    document.getElementById("scriptUrl").value = localStorage.getItem(STORAGE_KEYS.scriptUrl) || "";
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+    });
+
+    document.getElementById("movementForm").addEventListener("submit", saveMovement);
+    document.getElementById("goalForm").addEventListener("submit", saveGoal);
+    document.getElementById("settingsForm").addEventListener("submit", saveSettings);
+    document.getElementById("editBalancesBtn").addEventListener("click", openBalancesDialog);
+    document.getElementById("saveBalancesBtn").addEventListener("click", saveBalances);
+    document.getElementById("clearGoalsBtn").addEventListener("click", clearGoals);
+
+    ["filterType", "filterAccount", "searchText"].forEach(id => {
+      document.getElementById(id).addEventListener("input", renderMovements);
+    });
+
+    renderAll();
+
+    function readStorage(key, fallback) {
+      try {
+        return JSON.parse(localStorage.getItem(key)) ?? fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function writeStorage(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function defaultBalances() {
+      return ACCOUNT_CONFIG.reduce((acc, item) => {
+        acc[item.id] = 0;
+        return acc;
+      }, {});
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.tab === tabId));
+      document.querySelectorAll(".tab-content").forEach(section => section.classList.toggle("active", section.id === tabId));
+    }
+
+    async function saveMovement(event) {
+      event.preventDefault();
+
+      const movement = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        fecha: document.getElementById("fecha").value,
+        hora: document.getElementById("hora").value,
+        tipo: document.getElementById("tipo").value,
+        categoria: document.getElementById("categoria").value,
+        cuenta: document.getElementById("cuenta").value,
+        importe: Number(document.getElementById("importe").value),
+        descripcion: document.getElementById("descripcion").value.trim()
+      };
+
+      movements.unshift(movement);
+      writeStorage(STORAGE_KEYS.movements, movements);
+
+      event.target.reset();
+      document.getElementById("fecha").valueAsDate = new Date();
+      document.getElementById("hora").value = new Date().toTimeString().slice(0, 5);
+
+      renderAll();
+      showToast("Movimiento guardado en esta app.");
+
+      const sent = await sendToSheets(movement);
+      if (sent) showToast("Movimiento guardado también en Google Sheets.");
+    }
+
+    async function sendToSheets(movement) {
+      const scriptUrl = localStorage.getItem(STORAGE_KEYS.scriptUrl);
+      if (!scriptUrl) return false;
+
+      const params = new URLSearchParams({
+        fecha: movement.fecha,
+        hora: movement.hora,
+        tipo: movement.tipo,
+        categoria: movement.categoria,
+        importe: movement.importe,
+        descripcion: movement.descripcion,
+        cuenta: movement.cuenta
+      });
+
+      try {
+        await fetch(`${scriptUrl}?${params.toString()}`, { method: "GET", mode: "no-cors" });
+        return true;
+      } catch (error) {
+        showToast("No se pudo enviar a Google Sheets. Revisa la URL del Apps Script.");
+        return false;
+      }
+    }
+
+    function saveGoal(event) {
+      event.preventDefault();
+      const goal = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        name: document.getElementById("goalName").value.trim(),
+        target: Number(document.getElementById("goalTarget").value),
+        saved: Number(document.getElementById("goalSaved").value),
+        date: document.getElementById("goalDate").value
+      };
+
+      goals.unshift(goal);
+      writeStorage(STORAGE_KEYS.goals, goals);
+      event.target.reset();
+      document.getElementById("goalSaved").value = 0;
+      renderGoals();
+      showToast("Meta de ahorro guardada.");
+    }
+
+    function saveSettings(event) {
+      event.preventDefault();
+      const url = document.getElementById("scriptUrl").value.trim();
+      localStorage.setItem(STORAGE_KEYS.scriptUrl, url);
+      showToast("URL de Apps Script guardada.");
+    }
+
+    function currentBalances() {
+      const totals = { ...defaultBalances(), ...balances };
+
+      movements.forEach(m => {
+        const value = Number(m.importe) || 0;
+        if (!totals.hasOwnProperty(m.cuenta)) totals[m.cuenta] = 0;
+
+        if (m.tipo === "Ingreso") totals[m.cuenta] += value;
+        if (m.tipo === "Gasto") totals[m.cuenta] -= value;
+        if (m.tipo === "Transferencia") totals[m.cuenta] -= value;
+      });
+
+      return totals;
+    }
+
+    function renderAccounts() {
+      const container = document.getElementById("accountsList");
+      const totals = currentBalances();
+
+      container.innerHTML = ACCOUNT_CONFIG.map(account => `
+        <div class="account">
+          <div class="account-top">
+            <span class="pill ${account.pill}">${account.emoji} ${account.type}</span>
+          </div>
+          <small>${account.label}</small>
+          <strong>${euro.format(totals[account.id] || 0)}</strong>
+        </div>
+      `).join("");
+    }
+
+    function renderSummary() {
+      const totals = currentBalances();
+      const totalBalance = Object.values(totals).reduce((sum, value) => sum + Number(value || 0), 0);
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const monthMovements = movements.filter(m => m.fecha && m.fecha.slice(0, 7) === currentMonth);
+      const income = monthMovements.filter(m => m.tipo === "Ingreso").reduce((sum, m) => sum + Number(m.importe || 0), 0);
+      const expense = monthMovements.filter(m => m.tipo === "Gasto").reduce((sum, m) => sum + Number(m.importe || 0), 0);
+      const available = (totals["Cuenta nómina ING"] || 0) + (totals["Tarjeta débito ING"] || 0) + (totals["Efectivo monedero"] || 0);
+
+      document.getElementById("totalBalance").textContent = euro.format(totalBalance);
+      document.getElementById("monthIncome").textContent = euro.format(income);
+      document.getElementById("monthExpense").textContent = euro.format(expense);
+      document.getElementById("availableNow").textContent = euro.format(available);
+    }
+
+    function renderMovements() {
+      const tbody = document.getElementById("movementsTable");
+      const type = document.getElementById("filterType").value;
+      const account = document.getElementById("filterAccount").value;
+      const text = document.getElementById("searchText").value.toLowerCase();
+
+      const filtered = movements.filter(m => {
+        const matchesType = !type || m.tipo === type;
+        const matchesAccount = !account || m.cuenta === account;
+        const haystack = `${m.fecha} ${m.hora} ${m.tipo} ${m.categoria} ${m.cuenta} ${m.descripcion}`.toLowerCase();
+        const matchesText = !text || haystack.includes(text);
+        return matchesType && matchesAccount && matchesText;
+      });
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty">Todavía no hay movimientos para mostrar.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(m => {
+        const cls = m.tipo === "Ingreso" ? "income" : m.tipo === "Gasto" ? "expense" : "transfer";
+        const sign = m.tipo === "Ingreso" ? "+" : m.tipo === "Gasto" ? "-" : "↔";
+        return `
+          <tr>
+            <td>${escapeHtml(m.fecha)}</td>
+            <td>${escapeHtml(m.hora)}</td>
+            <td><span class="pill ${cls === "income" ? "green" : cls === "expense" ? "red" : "blue"}">${escapeHtml(m.tipo)}</span></td>
+            <td>${escapeHtml(m.categoria)}</td>
+            <td>${escapeHtml(m.cuenta || "")}</td>
+            <td class="amount ${cls}">${sign} ${euro.format(Number(m.importe || 0))}</td>
+            <td>${escapeHtml(m.descripcion || "")}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderGoals() {
+      const list = document.getElementById("goalList");
+      if (!goals.length) {
+        list.innerHTML = `<div class="empty">Aún no has creado metas de ahorro.</div>`;
+        return;
+      }
+
+      list.innerHTML = goals.map(goal => {
+        const percent = goal.target > 0 ? Math.min(100, (goal.saved / goal.target) * 100) : 0;
+        return `
+          <div class="goal">
+            <div class="goal-head">
+              <div>
+                <div class="goal-title">${escapeHtml(goal.name)}</div>
+                <small>${goal.date ? `Fecha objetivo: ${escapeHtml(goal.date)}` : "Sin fecha objetivo"}</small>
+              </div>
+              <span class="pill orange">${Math.round(percent)}%</span>
+            </div>
+            <div class="progress"><div class="bar" style="width:${percent}%"></div></div>
+            <div class="goal-meta">
+              <span>${euro.format(goal.saved)} ahorrados</span>
+              <span>${euro.format(goal.target)} objetivo</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function clearGoals() {
+      if (!confirm("¿Seguro que quieres borrar todas las metas?")) return;
+      goals = [];
+      writeStorage(STORAGE_KEYS.goals, goals);
+      renderGoals();
+      showToast("Metas borradas.");
+    }
+
+    function openBalancesDialog() {
+      const fields = document.getElementById("balancesFields");
+      fields.innerHTML = ACCOUNT_CONFIG.map(account => `
+        <label>${account.emoji} ${account.label}
+          <input type="number" step="0.01" data-balance-account="${account.id}" value="${balances[account.id] || 0}" />
+        </label>
+      `).join("");
+      document.getElementById("balancesDialog").showModal();
+    }
+
+    function saveBalances() {
+      document.querySelectorAll("[data-balance-account]").forEach(input => {
+        balances[input.dataset.balanceAccount] = Number(input.value || 0);
+      });
+      writeStorage(STORAGE_KEYS.balances, balances);
+      document.getElementById("balancesDialog").close();
+      renderAll();
+      showToast("Saldos iniciales actualizados.");
+    }
+
+    function renderAll() {
+      renderSummary();
+      renderAccounts();
+      renderMovements();
+      renderGoals();
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 3200);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+</body>
+</html>
