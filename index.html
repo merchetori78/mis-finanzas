@@ -437,6 +437,33 @@
       font-size: 0.85rem;
     }
 
+    .goal-saving {
+      margin-top: 12px;
+      padding: 12px 13px;
+      border-radius: 16px;
+      background: var(--green-soft);
+      color: var(--green);
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .goal-saving small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .goal-saving.warning {
+      background: var(--yellow-soft);
+      color: var(--yellow);
+    }
+
+    .goal-saving.done {
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
     .settings-note {
       color: var(--muted);
       line-height: 1.5;
@@ -694,6 +721,7 @@
             <label>Fecha objetivo
               <input id="goalDate" type="date" />
             </label>
+            <div id="goalMonthlyPreview" class="goal-saving warning">Indica objetivo, ahorrado y fecha para calcular el ahorro mensual.</div>
             <button class="primary" type="submit">Guardar meta</button>
           </form>
         </article>
@@ -795,6 +823,9 @@
 
     document.getElementById("movementForm").addEventListener("submit", saveMovement);
     document.getElementById("goalForm").addEventListener("submit", saveGoal);
+    ["goalTarget", "goalSaved", "goalDate"].forEach(id => {
+      document.getElementById(id).addEventListener("input", renderGoalMonthlyPreview);
+    });
     document.getElementById("settingsForm").addEventListener("submit", saveSettings);
     document.getElementById("editBalancesBtn").addEventListener("click", openBalancesDialog);
     document.getElementById("saveBalancesBtn").addEventListener("click", saveBalances);
@@ -807,6 +838,7 @@
     });
 
     renderAll();
+    renderGoalMonthlyPreview();
     runMonthlyCreditCardAutomation();
 
     function readStorage(key, fallback) {
@@ -1020,6 +1052,73 @@
       }
     }
 
+    function renderGoalMonthlyPreview() {
+      const target = Number(document.getElementById("goalTarget").value || 0);
+      const saved = Number(document.getElementById("goalSaved").value || 0);
+      const date = document.getElementById("goalDate").value;
+      const preview = document.getElementById("goalMonthlyPreview");
+      if (!preview) return;
+
+      const info = monthlySavingsInfo({ target, saved, date });
+      preview.className = `goal-saving ${info.status}`;
+      preview.innerHTML = info.html;
+    }
+
+    function monthlySavingsInfo(goal) {
+      const target = Number(goal.target || 0);
+      const saved = Number(goal.saved || 0);
+      const remaining = Math.max(0, target - saved);
+
+      if (target <= 0) {
+        return {
+          status: "warning",
+          html: "Indica un objetivo para calcular el ahorro mensual."
+        };
+      }
+
+      if (remaining <= 0) {
+        return {
+          status: "done",
+          html: `Meta conseguida 🎉<small>Ya tienes ahorrados ${euro.format(saved)} de ${euro.format(target)}.</small>`
+        };
+      }
+
+      if (!goal.date) {
+        return {
+          status: "warning",
+          html: `Faltan ${euro.format(remaining)}<small>Añade una fecha objetivo para calcular cuánto ahorrar al mes.</small>`
+        };
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const targetDate = new Date(`${goal.date}T00:00:00`);
+
+      if (Number.isNaN(targetDate.getTime())) {
+        return {
+          status: "warning",
+          html: "La fecha objetivo no es válida."
+        };
+      }
+
+      const diffDays = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+      if (diffDays <= 0) {
+        return {
+          status: "warning",
+          html: `Fecha objetivo vencida<small>Faltan ${euro.format(remaining)}. Cambia la fecha para recalcular el ahorro mensual.</small>`
+        };
+      }
+
+      const months = Math.max(1, Math.ceil(diffDays / 30.4375));
+      const monthly = remaining / months;
+      const monthText = months === 1 ? "1 mes" : `${months} meses`;
+
+      return {
+        status: "",
+        html: `Ahorro necesario: ${euro.format(monthly)} / mes<small>Faltan ${euro.format(remaining)} y quedan aproximadamente ${monthText}.</small>`
+      };
+    }
+
     function saveGoal(event) {
       event.preventDefault();
       const goal = {
@@ -1034,6 +1133,7 @@
       writeStorage(STORAGE_KEYS.goals, goals);
       event.target.reset();
       document.getElementById("goalSaved").value = 0;
+      renderGoalMonthlyPreview();
       renderGoals();
       showToast("Meta de ahorro guardada.");
     }
@@ -1136,6 +1236,7 @@
 
       list.innerHTML = goals.map(goal => {
         const percent = goal.target > 0 ? Math.min(100, (goal.saved / goal.target) * 100) : 0;
+        const savingInfo = monthlySavingsInfo(goal);
         return `
           <div class="goal">
             <div class="goal-head">
@@ -1150,6 +1251,7 @@
               <span>${euro.format(goal.saved)} ahorrados</span>
               <span>${euro.format(goal.target)} objetivo</span>
             </div>
+            <div class="goal-saving ${savingInfo.status}">${savingInfo.html}</div>
           </div>
         `;
       }).join("");
