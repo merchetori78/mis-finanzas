@@ -724,6 +724,18 @@
           Para guardar también la cuenta en Sheets, añade una columna nueva llamada <strong>Cuenta</strong> y cambia tu <code>appendRow</code> a:<br><br>
           <code>hoja.appendRow([p.fecha, p.hora, p.tipo, p.categoria, p.importe, p.descripcion, p.cuenta]);</code>
         </div>
+
+        <h2 style="margin-top:22px;">Automatización tarjeta de crédito</h2>
+        <div class="settings-note">
+          La app revisa automáticamente la tarjeta al abrirse. El día <strong>4</strong> de cada mes avisa si la cuenta nómina no cubre la deuda de la tarjeta de crédito. El día <strong>5</strong> registra el cargo mensual: resta la deuda de la cuenta nómina y deja la tarjeta de crédito a cero.
+        </div>
+        <label style="margin-top:14px;">
+          <span>
+            <input id="browserNotifications" type="checkbox" style="width:auto;margin-right:8px;" />
+            Activar notificaciones del navegador para el aviso del día 4
+          </span>
+        </label>
+        <button class="secondary" id="requestNotificationsBtn" type="button" style="margin-top:12px;">Permitir notificaciones</button>
       </article>
     </section>
   </div>
@@ -747,7 +759,9 @@
       movements: "finanzas_movimientos_v1",
       balances: "finanzas_saldos_v1",
       goals: "finanzas_metas_v1",
-      scriptUrl: "finanzas_script_url_v1"
+      scriptUrl: "finanzas_script_url_v1",
+      automationLog: "finanzas_automatizaciones_v1",
+      browserNotifications: "finanzas_notificaciones_navegador_v1"
     };
 
     const ACCOUNT_CONFIG = [
@@ -773,6 +787,7 @@
     document.getElementById("fecha").valueAsDate = today;
     document.getElementById("hora").value = today.toTimeString().slice(0, 5);
     document.getElementById("scriptUrl").value = localStorage.getItem(STORAGE_KEYS.scriptUrl) || "";
+    document.getElementById("browserNotifications").checked = localStorage.getItem(STORAGE_KEYS.browserNotifications) === "true";
 
     document.querySelectorAll(".tab-btn").forEach(btn => {
       btn.addEventListener("click", () => switchTab(btn.dataset.tab));
@@ -784,12 +799,15 @@
     document.getElementById("editBalancesBtn").addEventListener("click", openBalancesDialog);
     document.getElementById("saveBalancesBtn").addEventListener("click", saveBalances);
     document.getElementById("clearGoalsBtn").addEventListener("click", clearGoals);
+    document.getElementById("browserNotifications").addEventListener("change", saveNotificationPreference);
+    document.getElementById("requestNotificationsBtn").addEventListener("click", requestBrowserNotifications);
 
     ["filterType", "filterAccount", "searchText"].forEach(id => {
       document.getElementById(id).addEventListener("input", renderMovements);
     });
 
     renderAll();
+    runMonthlyCreditCardAutomation();
 
     function readStorage(key, fallback) {
       try {
@@ -881,6 +899,125 @@
           resolve(true);
         }, 2500);
       });
+    }
+
+
+    function localMonthKey(date = new Date()) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      return `${year}-${month}`;
+    }
+
+    function readAutomationLog() {
+      return readStorage(STORAGE_KEYS.automationLog, {});
+    }
+
+    function writeAutomationLog(log) {
+      writeStorage(STORAGE_KEYS.automationLog, log);
+    }
+
+    function creditCardDebt(totals = currentBalances()) {
+      return Math.max(0, -(Number(totals["Tarjeta crédito ING"]) || 0));
+    }
+
+    function saveNotificationPreference() {
+      const enabled = document.getElementById("browserNotifications").checked;
+      localStorage.setItem(STORAGE_KEYS.browserNotifications, String(enabled));
+
+      if (enabled && "Notification" in window && Notification.permission === "default") {
+        requestBrowserNotifications();
+      } else {
+        showToast(enabled ? "Avisos de navegador activados." : "Avisos de navegador desactivados.");
+      }
+    }
+
+    async function requestBrowserNotifications() {
+      if (!("Notification" in window)) {
+        showToast("Este navegador no permite notificaciones.");
+        document.getElementById("browserNotifications").checked = false;
+        localStorage.setItem(STORAGE_KEYS.browserNotifications, "false");
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      const enabled = permission === "granted";
+      document.getElementById("browserNotifications").checked = enabled;
+      localStorage.setItem(STORAGE_KEYS.browserNotifications, String(enabled));
+      showToast(enabled ? "Notificaciones permitidas." : "No se han permitido las notificaciones.");
+    }
+
+    function notifyUser(title, message) {
+      showToast(`${title}: ${message}`);
+
+      const enabled = localStorage.getItem(STORAGE_KEYS.browserNotifications) === "true";
+      if (enabled && "Notification" in window && Notification.permission === "granted") {
+        new Notification(title, {
+          body: message,
+          icon: ""
+        });
+      }
+    }
+
+    function runMonthlyCreditCardAutomation() {
+      const now = new Date();
+      const day = now.getDate();
+      const monthKey = localMonthKey(now);
+      const log = readAutomationLog();
+      const totals = currentBalances();
+      const payrollBalance = Number(totals["Cuenta nómina ING"] || 0);
+      const debt = creditCardDebt(totals);
+
+      if (day === 4 && debt > 0 && payrollBalance < debt && log[`warning-${monthKey}`] !== true) {
+        const missing = debt - payrollBalance;
+        notifyUser(
+          "Aviso tarjeta de crédito",
+          `Mañana se cargan ${euro.format(debt)}. En la cuenta nómina hay ${euro.format(payrollBalance)}; faltan ${euro.format(missing)}.`
+        );
+        log[`warning-${monthKey}`] = true;
+        writeAutomationLog(log);
+      }
+
+      if (day === 5 && debt > 0 && log[`payment-${monthKey}`] !== true) {
+        const fecha = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+        const hora = now.toTimeString().slice(0, 5);
+        const description = `Cargo automático tarjeta crédito ${monthKey}`;
+
+        const payrollCharge = {
+          id: crypto.randomUUID ? crypto.randomUUID() : `payroll-${Date.now()}`,
+          fecha,
+          hora,
+          tipo: "Gasto",
+          categoria: "Otros",
+          cuenta: "Cuenta nómina ING",
+          importe: debt,
+          descripcion: description
+        };
+
+        const cardSettlement = {
+          id: crypto.randomUUID ? crypto.randomUUID() : `card-${Date.now()}`,
+          fecha,
+          hora,
+          tipo: "Ingreso",
+          categoria: "Otros",
+          cuenta: "Tarjeta crédito ING",
+          importe: debt,
+          descripcion: `Regularización automática tarjeta crédito ${monthKey}`
+        };
+
+        movements.unshift(cardSettlement, payrollCharge);
+        writeStorage(STORAGE_KEYS.movements, movements);
+        log[`payment-${monthKey}`] = true;
+        writeAutomationLog(log);
+        renderAll();
+
+        notifyUser(
+          "Cargo automático registrado",
+          `Se han restado ${euro.format(debt)} de la cuenta nómina y la tarjeta de crédito queda regularizada.`
+        );
+
+        sendToSheets(payrollCharge);
+        sendToSheets(cardSettlement);
+      }
     }
 
     function saveGoal(event) {
