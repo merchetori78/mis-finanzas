@@ -714,14 +714,17 @@
               <label>Objetivo
                 <input id="goalTarget" type="number" step="0.01" min="0" required />
               </label>
-              <label>Ahorrado ahora
+              <label>Ahorro adicional ya reservado
                 <input id="goalSaved" type="number" step="0.01" min="0" value="0" required />
               </label>
+            </div>
+            <div class="settings-note" style="margin-top:0;">
+              El saldo vivo de la <strong>Cuenta naranja ING</strong> se suma automáticamente al ahorro de cada meta. Si haces ingresos o retiradas durante el mes, la previsión se recalcula sola.
             </div>
             <label>Fecha objetivo
               <input id="goalDate" type="date" />
             </label>
-            <div id="goalMonthlyPreview" class="goal-saving warning">Indica objetivo, ahorrado y fecha para calcular el ahorro mensual.</div>
+            <div id="goalMonthlyPreview" class="goal-saving warning">Indica objetivo, ahorro adicional y fecha para calcular el ahorro mensual.</div>
             <button class="primary" type="submit">Guardar meta</button>
           </form>
         </article>
@@ -1124,29 +1127,40 @@
       preview.innerHTML = info.html;
     }
 
+    function currentSavingsBalance() {
+      const totals = currentBalances();
+      return Math.max(0, Number(totals["Cuenta naranja ING"] || 0));
+    }
+
+    function goalAvailableSaved(goal) {
+      return Number(goal.saved || 0) + currentSavingsBalance();
+    }
+
     function monthlySavingsInfo(goal) {
       const target = Number(goal.target || 0);
-      const saved = Number(goal.saved || 0);
+      const manualSaved = Number(goal.saved || 0);
+      const orangeSaved = currentSavingsBalance();
+      const saved = manualSaved + orangeSaved;
       const remaining = Math.max(0, target - saved);
 
       if (target <= 0) {
         return {
           status: "warning",
-          html: "Indica un objetivo para calcular el ahorro mensual."
+          html: `Indica un objetivo para calcular el ahorro mensual.<small>Ahora mismo se contarían ${euro.format(currentSavingsBalance())} de la Cuenta naranja.</small>`
         };
       }
 
       if (remaining <= 0) {
         return {
           status: "done",
-          html: `Meta conseguida 🎉<small>Ya tienes ahorrados ${euro.format(saved)} de ${euro.format(target)}.</small>`
+          html: `Meta conseguida 🎉<small>Incluye ${euro.format(orangeSaved)} de la Cuenta naranja y ${euro.format(manualSaved)} de ahorro adicional.</small>`
         };
       }
 
       if (!goal.date) {
         return {
           status: "warning",
-          html: `Faltan ${euro.format(remaining)}<small>Añade una fecha objetivo para calcular cuánto ahorrar al mes.</small>`
+          html: `Faltan ${euro.format(remaining)}<small>Ya se están contando ${euro.format(orangeSaved)} de la Cuenta naranja. Añade una fecha objetivo para calcular cuánto ahorrar al mes.</small>`
         };
       }
 
@@ -1165,7 +1179,7 @@
       if (diffDays <= 0) {
         return {
           status: "warning",
-          html: `Fecha objetivo vencida<small>Faltan ${euro.format(remaining)}. Cambia la fecha para recalcular el ahorro mensual.</small>`
+          html: `Fecha objetivo vencida<small>Faltan ${euro.format(remaining)}. Ya se cuentan ${euro.format(orangeSaved)} de la Cuenta naranja.</small>`
         };
       }
 
@@ -1175,7 +1189,7 @@
 
       return {
         status: "",
-        html: `Ahorro necesario: ${euro.format(monthly)} / mes<small>Faltan ${euro.format(remaining)} y quedan aproximadamente ${monthText}.</small>`
+        html: `Ahorro necesario: ${euro.format(monthly)} / mes<small>Faltan ${euro.format(remaining)} y quedan aproximadamente ${monthText}. Incluye ${euro.format(orangeSaved)} de la Cuenta naranja.</small>`
       };
     }
 
@@ -1295,7 +1309,10 @@
       }
 
       list.innerHTML = goals.map(goal => {
-        const percent = goal.target > 0 ? Math.min(100, (goal.saved / goal.target) * 100) : 0;
+        const availableSaved = goalAvailableSaved(goal);
+        const orangeSaved = currentSavingsBalance();
+        const manualSaved = Number(goal.saved || 0);
+        const percent = goal.target > 0 ? Math.min(100, (availableSaved / goal.target) * 100) : 0;
         const savingInfo = monthlySavingsInfo(goal);
         return `
           <div class="goal">
@@ -1308,8 +1325,12 @@
             </div>
             <div class="progress"><div class="bar" style="width:${percent}%"></div></div>
             <div class="goal-meta">
-              <span>${euro.format(goal.saved)} ahorrados</span>
+              <span>${euro.format(availableSaved)} ahorrados</span>
               <span>${euro.format(goal.target)} objetivo</span>
+            </div>
+            <div class="goal-meta" style="margin-top:6px;">
+              <span>Cuenta naranja: ${euro.format(orangeSaved)}</span>
+              <span>Adicional: ${euro.format(manualSaved)}</span>
             </div>
             <div class="goal-saving ${savingInfo.status}">${savingInfo.html}</div>
           </div>
