@@ -755,7 +755,7 @@
 
         <h2 style="margin-top:22px;">Automatización tarjeta de crédito</h2>
         <div class="settings-note">
-          La app revisa automáticamente la tarjeta al abrirse. El día <strong>4</strong> de cada mes avisa si la cuenta nómina no cubre la deuda de la tarjeta de crédito. El día <strong>5</strong> registra el cargo mensual: resta la deuda de la cuenta nómina y deja la tarjeta de crédito a cero.
+          La app revisa automáticamente la tarjeta al abrirse. El día <strong>28</strong> de cada mes cierra la tarjeta de crédito: registra una regularización para dejarla a cero y guarda ese importe como cargo pendiente. El día <strong>4</strong> del mes siguiente avisa si la cuenta nómina no cubre ese cargo. El día <strong>5</strong> registra el cargo en la cuenta nómina.
         </div>
         <label style="margin-top:14px;">
           <span>
@@ -789,6 +789,7 @@
       goals: "finanzas_metas_v1",
       scriptUrl: "finanzas_script_url_v1",
       automationLog: "finanzas_automatizaciones_v1",
+      pendingCreditCardPayments: "finanzas_tarjeta_credito_pendientes_v1",
       browserNotifications: "finanzas_notificaciones_navegador_v1"
     };
 
@@ -952,6 +953,24 @@
       return Math.max(0, -(Number(totals["Tarjeta crédito ING"]) || 0));
     }
 
+    function readPendingCreditCardPayments() {
+      return readStorage(STORAGE_KEYS.pendingCreditCardPayments, {});
+    }
+
+    function writePendingCreditCardPayments(pending) {
+      writeStorage(STORAGE_KEYS.pendingCreditCardPayments, pending);
+    }
+
+    function addMonthsToMonthKey(monthKey, monthsToAdd) {
+      const [year, month] = monthKey.split("-").map(Number);
+      const date = new Date(year, month - 1 + monthsToAdd, 1);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    }
+
+    function previousMonthKey(date = new Date()) {
+      return localMonthKey(new Date(date.getFullYear(), date.getMonth() - 1, 1));
+    }
+
     function saveNotificationPreference() {
       const enabled = document.getElementById("browserNotifications").checked;
       localStorage.setItem(STORAGE_KEYS.browserNotifications, String(enabled));
@@ -994,25 +1013,75 @@
       const now = new Date();
       const day = now.getDate();
       const monthKey = localMonthKey(now);
+      const previousKey = previousMonthKey(now);
       const log = readAutomationLog();
+      const pending = readPendingCreditCardPayments();
       const totals = currentBalances();
       const payrollBalance = Number(totals["Cuenta nómina ING"] || 0);
-      const debt = creditCardDebt(totals);
 
-      if (day === 4 && debt > 0 && payrollBalance < debt && log[`warning-${monthKey}`] !== true) {
-        const missing = debt - payrollBalance;
+      // Día 28: cierre mensual de la tarjeta. La deuda se convierte en un cargo pendiente
+      // para el día 5 del mes siguiente y la tarjeta queda a cero en la app.
+      const debtToClose = creditCardDebt(totals);
+      if (day === 28 && debtToClose > 0 && log[`close-${monthKey}`] !== true) {
+        const fecha = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+        const hora = now.toTimeString().slice(0, 5);
+        const dueMonthKey = addMonthsToMonthKey(monthKey, 1);
+        const dueDate = `${dueMonthKey}-05`;
+        const description = `Cierre tarjeta crédito ${monthKey}. Cargo previsto en cuenta nómina el ${dueDate}`;
+
+        const cardSettlement = {
+          id: crypto.randomUUID ? crypto.randomUUID() : `card-close-${Date.now()}`,
+          fecha,
+          hora,
+          tipo: "Ingreso",
+          categoria: "Otros",
+          cuenta: "Tarjeta crédito ING",
+          importe: debtToClose,
+          descripcion: description
+        };
+
+        pending[monthKey] = {
+          amount: debtToClose,
+          dueMonthKey,
+          dueDate,
+          paid: false,
+          createdAt: new Date().toISOString()
+        };
+
+        movements.unshift(cardSettlement);
+        writeStorage(STORAGE_KEYS.movements, movements);
+        writePendingCreditCardPayments(pending);
+        log[`close-${monthKey}`] = true;
+        writeAutomationLog(log);
+        renderAll();
+
+        notifyUser(
+          "Cierre tarjeta de crédito",
+          `La tarjeta queda a cero. Se guardan ${euro.format(debtToClose)} para cargarlos en la cuenta nómina el ${dueDate}.`
+        );
+
+        sendToSheets(cardSettlement);
+      }
+
+      const pendingPrevious = pending[previousKey];
+      const pendingAmount = pendingPrevious && !pendingPrevious.paid ? Number(pendingPrevious.amount || 0) : 0;
+
+      // Día 4: aviso preventivo, ya sobre el cargo pendiente generado en el cierre del día 28 anterior.
+      if (day === 4 && pendingAmount > 0 && payrollBalance < pendingAmount && log[`warning-${monthKey}`] !== true) {
+        const missing = pendingAmount - payrollBalance;
         notifyUser(
           "Aviso tarjeta de crédito",
-          `Mañana se cargan ${euro.format(debt)}. En la cuenta nómina hay ${euro.format(payrollBalance)}; faltan ${euro.format(missing)}.`
+          `Mañana se cargan ${euro.format(pendingAmount)}. En la cuenta nómina hay ${euro.format(payrollBalance)}; faltan ${euro.format(missing)}.`
         );
         log[`warning-${monthKey}`] = true;
         writeAutomationLog(log);
       }
 
-      if (day === 5 && debt > 0 && log[`payment-${monthKey}`] !== true) {
+      // Día 5: cargo en cuenta nómina del cierre de la tarjeta del mes anterior.
+      if (day === 5 && pendingAmount > 0 && log[`payment-${previousKey}`] !== true) {
         const fecha = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
         const hora = now.toTimeString().slice(0, 5);
-        const description = `Cargo automático tarjeta crédito ${monthKey}`;
+        const description = `Cargo tarjeta crédito cierre ${previousKey}`;
 
         const payrollCharge = {
           id: crypto.randomUUID ? crypto.randomUUID() : `payroll-${Date.now()}`,
@@ -1021,34 +1090,25 @@
           tipo: "Gasto",
           categoria: "Otros",
           cuenta: "Cuenta nómina ING",
-          importe: debt,
+          importe: pendingAmount,
           descripcion: description
         };
 
-        const cardSettlement = {
-          id: crypto.randomUUID ? crypto.randomUUID() : `card-${Date.now()}`,
-          fecha,
-          hora,
-          tipo: "Ingreso",
-          categoria: "Otros",
-          cuenta: "Tarjeta crédito ING",
-          importe: debt,
-          descripcion: `Regularización automática tarjeta crédito ${monthKey}`
-        };
-
-        movements.unshift(cardSettlement, payrollCharge);
+        movements.unshift(payrollCharge);
         writeStorage(STORAGE_KEYS.movements, movements);
-        log[`payment-${monthKey}`] = true;
+        pending[previousKey].paid = true;
+        pending[previousKey].paidAt = new Date().toISOString();
+        writePendingCreditCardPayments(pending);
+        log[`payment-${previousKey}`] = true;
         writeAutomationLog(log);
         renderAll();
 
         notifyUser(
           "Cargo automático registrado",
-          `Se han restado ${euro.format(debt)} de la cuenta nómina y la tarjeta de crédito queda regularizada.`
+          `Se han restado ${euro.format(pendingAmount)} de la cuenta nómina por el cierre de tarjeta de ${previousKey}.`
         );
 
         sendToSheets(payrollCharge);
-        sendToSheets(cardSettlement);
       }
     }
 
