@@ -791,7 +791,9 @@
       balances: "finanzas_saldos_v1",
       goals: "finanzas_metas_v1",
       scriptUrl: "finanzas_script_url_v1",
-      automationLog: "finanzas_automatizaciones_v1"
+      automationLog: "finanzas_automatizaciones_v1",
+      browserNotifications: "finanzas_notificaciones_v1",
+      pendingCreditCardPayments: "finanzas_pagos_tarjeta_pendientes_v1"
     };
 
     const ACCOUNT_CONFIG = [
@@ -1010,8 +1012,7 @@
       }
     }
 
-    <script>
-function runMonthlyCreditCardAutomation() {
+    function runMonthlyCreditCardAutomation() {
   const now = new Date();
   const day = now.getDate();
   const monthKey = localMonthKey(now);
