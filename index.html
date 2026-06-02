@@ -796,6 +796,8 @@
       pendingCreditCardPayments: "finanzas_pagos_tarjeta_pendientes_v1"
     };
 
+    const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtJsmJDfpAPIN7cXfU2-nFlKF_OkpO3vSyp9MRcAvPTAJPjL52j9B2GqrDtX5LdZx0Vw/exec";
+
     const ACCOUNT_CONFIG = [
       { id: "Cuenta nómina ING", label: "Cuenta nómina", emoji: "🏦", pill: "orange", type: "Cuenta" },
       { id: "Cuenta naranja ING", label: "Cuenta naranja", emoji: "🍊", pill: "orange", type: "Ahorro" },
@@ -818,7 +820,10 @@
     const today = new Date();
     document.getElementById("fecha").valueAsDate = today;
     document.getElementById("hora").value = today.toTimeString().slice(0, 5);
-    document.getElementById("scriptUrl").value = localStorage.getItem(STORAGE_KEYS.scriptUrl) || "";
+    document.getElementById("scriptUrl").value = localStorage.getItem(STORAGE_KEYS.scriptUrl) || DEFAULT_SCRIPT_URL;
+    if (!localStorage.getItem(STORAGE_KEYS.scriptUrl)) {
+      localStorage.setItem(STORAGE_KEYS.scriptUrl, DEFAULT_SCRIPT_URL);
+    }
     document.getElementById("browserNotifications").checked = localStorage.getItem(STORAGE_KEYS.browserNotifications) === "true";
 
     document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -898,7 +903,7 @@
     }
 
     async function sendToSheets(movement) {
-      const scriptUrl = localStorage.getItem(STORAGE_KEYS.scriptUrl);
+      const scriptUrl = localStorage.getItem(STORAGE_KEYS.scriptUrl) || DEFAULT_SCRIPT_URL;
       if (!scriptUrl) {
         showToast("Movimiento guardado solo en la app: falta la URL del Apps Script.");
         return false;
@@ -1190,8 +1195,9 @@ localStorage.setItem(
 
     function saveSettings(event) {
       event.preventDefault();
-      const url = document.getElementById("scriptUrl").value.trim();
+      const url = document.getElementById("scriptUrl").value.trim() || DEFAULT_SCRIPT_URL;
       localStorage.setItem(STORAGE_KEYS.scriptUrl, url);
+      document.getElementById("scriptUrl").value = url;
       showToast("URL de Apps Script guardada.");
     }
 
